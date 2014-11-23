@@ -1,0 +1,85 @@
+---
+title: "PML Course Project"
+author: "Viacheslav Shybaiev"
+date: "November 23, 2014"
+output: html_document
+---
+
+# Introduction
+This is an Practical Machine Learning course projest.
+The assignment objective is to build the learning algorythm to the Human Activity 
+Recognitiondata set of 6 participants who were asked to perform barbell lifting 
+activities correctly and incorrectly in 5 different ways.
+
+Data set credits:
+Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013.
+
+Read more: http://groupware.les.inf.puc-rio.br/har#ixzz3JtzTNxAi
+
+# Processing Data
+Reading the raw data from CSV files and building the training model on the *classe* 
+factor against the non-empty columns of the training set:
+roll_belt, pitch_belt, yaw_belt, gyros_belt_x, 
+gyros_belt_y, gyros_belt_z, accel_belt_x, accel_belt_y, 
+accel_belt_z, magnet_belt_x, magnet_belt_y, magnet_belt_z, 
+roll_arm, pitch_arm, yaw_arm, total_accel_arm, gyros_arm_x, 
+gyros_arm_y, gyros_arm_z, accel_arm_x, accel_arm_y, accel_arm_z, 
+magnet_arm_x, magnet_arm_y, magnet_arm_z, roll_dumbbell, and yaw_dumbbell.
+
+We're using the Random Forest algorithm for the training model.
+
+```{r, echo=FALSE}
+library("caret", lib.loc="/Library/Frameworks/R.framework/Versions/3.1/Resources/library")
+library("randomForest", lib.loc="/Library/Frameworks/R.framework/Versions/3.1/Resources/library")
+library("lattice", lib.loc="/Library/Frameworks/R.framework/Versions/3.1/Resources/library")
+library("ggplot2", lib.loc="/Library/Frameworks/R.framework/Versions/3.1/Resources/library")
+
+```
+
+```{r, echo=TRUE, cache=TRUE}
+rawTrain = read.csv ("pml-training.csv")
+rawTest = read.csv ("pml-testing.csv")
+
+fit = train (classe ~ roll_belt + pitch_belt + yaw_belt + gyros_belt_x + 
+                     gyros_belt_y + gyros_belt_z + accel_belt_x + accel_belt_y + 
+                     accel_belt_z + magnet_belt_x + magnet_belt_y + magnet_belt_z + 
+                     roll_arm + pitch_arm + yaw_arm + total_accel_arm + gyros_arm_x + 
+                     gyros_arm_y + gyros_arm_z + accel_arm_x + accel_arm_y + accel_arm_z + 
+                     magnet_arm_x + magnet_arm_y + magnet_arm_z + roll_dumbbell + 
+                     yaw_dumbbell, method = "rf", data=rawTrain)
+
+```
+
+## Overview of the model
+```{r, echo=TRUE}
+print(fit)
+```
+
+The test set contsist of 20 test cases which we're going to classify on the 
+*classe* factor.
+
+Call predict function from the caret package:
+```{r, echo=TRUE}
+predict(fit, rawTest)
+```
+
+As seen above, there are 20 classifications for each of the test cases.
+
+## Estimate of sample error
+
+We're using plot of the final model to estimate the sample error:
+
+```{r, echo=FALSE}
+plot(fit$finalModel, compress = TRUE)
+```
+
+## Variable Importance
+Further model optimisation could be done using the variable importance order:
+```{r, echo=TRUE}
+varImp(fit)
+```
+
+# Summary
+In this assignment we performed very basic machine learning excersise building 
+the training model and using the Ranfom Forest algorithm.
+
